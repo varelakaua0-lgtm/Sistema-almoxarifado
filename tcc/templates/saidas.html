@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deletar Item - SENAI</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='fiep.jpg') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .page-wrapper {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+        .form-side {
+            flex: 1;
+            min-width: 300px;
+        }
+        .table-side {
+            flex: 2;
+            min-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #f8f9fa; }
+
+        .btn-danger-full {
+            width: 100%;
+            padding: 12px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            margin-top: 8px;
+        }
+        .btn-danger-full:hover { background: #b02a37; }
+
+        .btn-apagar-banco {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a1a;
+            color: #ff4d4d;
+            border: 2px solid #ff4d4d;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 15px;
+            margin-top: 16px;
+            letter-spacing: 0.5px;
+        }
+        .btn-apagar-banco:hover { background: #ff4d4d; color: white; }
+
+        .log-table tr:nth-child(even) { background: #f8f9fa; }
+        .badge-admin {
+            background: #6c757d;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="brand">SENAI</div>
+        <div class="nav-links">
+            <a href="/home">Home</a>
+            <a href="/adicionaritens">Adicionar Itens</a>
+            <a href="/estoque">Estoque</a>
+            <a href="/" class="btn-logout">Fechar</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <h1>Gerenciamento de Exclusão</h1>
+            <p>Remove um item permanentemente do banco de dados.</p>
+        </div>
+
+        <div class="page-wrapper">
+
+            <!-- ── FORMULÁRIO DELETAR ── -->
+            <div class="form-side">
+                <div class="content-card">
+                    <div class="card-header"><h2> Deletar Item</h2></div>
+
+                    <div class="form-group">
+                        <label for="id_deletar">ID do Item *</label>
+                        <input type="number" id="id_deletar" placeholder="Ex: 1">
+                    </div>
+
+                    <div class="form-group" style="margin-top:12px;">
+                        <label for="nome_admin">Seu Nome *</label>
+                        <input type="text" id="nome_admin" placeholder="Ex: Carlos">
+                    </div>
+
+                    <div class="form-group" style="margin-top:12px;">
+                        <label for="data_delete">Data e Hora do Delete *</label>
+                        <input type="datetime-local" id="data_delete">
+                    </div>
+
+                    <button type="button" onclick="deletarItem()" class="btn-danger-full">
+                         Deletar Item
+                    </button>
+
+                    <!-- Botão apagar banco -->
+                    <button type="button" onclick="apagarBanco()" class="btn-apagar-banco">
+                        Apagar Todo o Banco
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── TABELA ITENS ATUAIS ── -->
+            <div class="table-side">
+                <h2>Itens Atuais</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Quantidade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in itens %}
+                        <tr>
+                            <td>{{ item.id }}</td>
+                            <td>{{ item.nome }}</td>
+                            <td>{{ item.quantidade }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ── HISTÓRICO DE EXCLUSÕES (log_deletes) ── -->
+        <div class="content-card" style="margin-top: 30px;">
+            <div class="card-header"><h2>Historico de Exclusões</h2></div>
+            {% if log %}
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Admin</th>
+                        <th>Item Deletado</th>
+                        <th>Categoria</th>
+                        <th>Preço</th>
+                        <th>Qtde</th>
+                        <th>Data/Hora Informada</th>
+                        <th>Registrado em</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for l in log %}
+                    <tr>
+                        <td>{{ l.id }}</td>
+                        <td><span class="badge-admin">{{ l.nome_admin }}</span></td>
+                        <td><strong>{{ l.item }}</strong></td>
+                        <td>{{ l.categoria or '-' }}</td>
+                        <td>R$ {{ "%.2f"|format(l.preco) if l.preco else '-' }}</td>
+                        <td>{{ l.qtde }}</td>
+                        <td>{{ l.data_delete.strftime('%d/%m/%Y %H:%M') if l.data_delete else '-' }}</td>
+                        <td>{{ l.registrado_em.strftime('%d/%m/%Y %H:%M') if l.registrado_em else '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="color: #888; padding: 10px 0;">Nenhum item foi deletado ainda.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Preenche a data/hora atual automaticamente ao carregar
+        window.onload = function() {
+            const agora = new Date();
+            agora.setMinutes(agora.getMinutes() - agora.getTimezoneOffset());
+            document.getElementById('data_delete').value = agora.toISOString().slice(0, 16);
+        };
+
+        function deletarItem() {
+            const id        = document.getElementById('id_deletar').value.trim();
+            const nome      = document.getElementById('nome_admin').value.trim();
+            const dataHora  = document.getElementById('data_delete').value;
+
+            if (!id || !nome || !dataHora) {
+                Swal.fire({ icon: 'warning', title: 'Preencha todos os campos!' });
+                return;
+            }
+
+            fetch(`/api/item/${id}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.nome) {
+                        Swal.fire({ icon: 'error', title: 'Item não encontrado!' });
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Confirmar exclusão?',
+                        html: `O item <b>"${data.nome}"</b> será removido permanentemente.<br><br>
+                               <small>Responsável: <b>${nome}</b><br>
+                               Data/Hora: <b>${dataHora.replace('T',' ')}</b></small>`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonText: 'Sim, deletar!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch(`/api/deletaritem/${id}`, {
+                                method: 'DELETE',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ nome_admin: nome, data_delete: dataHora })
+                            })
+                            .then(r => r.json())
+                            .then(resp => {
+                                if (resp.ok) {
+                                    Swal.fire('Sucesso!', resp.mensagem, 'success')
+                                        .then(() => location.reload());
+                                } else {
+                                    Swal.fire('Erro!', resp.erro, 'error');
+                                }
+                            });
+                        }
+                    });
+                });
+        }
+
+        function apagarBanco() {
+            Swal.fire({
+                title: '⚠️ APAGAR TODO O BANCO?',
+                html: 'Isso vai apagar <b>todo o estoque, saídas e usuários</b>.<br>Essa ação <b>não pode ser desfeita</b>!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: 'Cancelar',
+                confirmButtonText: 'Sim, apagar tudo!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/api/apagar-banco', { method: 'DELETE' })
+                        .then(r => r.json())
+                        .then(resp => {
+                            if (resp.ok) {
+                                Swal.fire('Banco apagado!', 'Todos os dados foram removidos.', 'success')
+                                    .then(() => location.reload());
+                            } else {
+                                Swal.fire('Erro!', resp.erro, 'error');
+                            }
+                        });
+                }
+            });
+        }
+    </script>
+</body>
+</html>

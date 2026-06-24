@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home - SENAI</title>
+    <link
+      rel="shortcut icon"
+      type="image/png"
+      href="{{ url_for('static', filename='fiep.jpg') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="brand">SENAI</div>
+      <div class="nav-links">
+        <a href="/adicionaritens">Adicionar Itens</a>
+        <a href="/estoque">Estoque</a>
+        {% if session.get('tipo') == 'adm' %}
+        <a href="/saidas">Registrar Saídas</a>
+        {% endif %}
+        <a href="/criarconta">Criar Conta</a>
+        <a href="#" class="btn-logout" onclick="confirmarLogout(event)"
+          >Fechar</a
+        >
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="header-section">
+        <h1>Painel de Controle - Almoxarifado</h1>
+        <p>Bem-vindo! Veja abaixo o resumo e os últimos itens cadastrados.</p>
+      </div>
+
+      <div class="stats-grid" style="margin-bottom: 2rem">
+        <div
+          class="stat-card"
+          onclick="location.href = '/adicionaritens'"
+          style="cursor: pointer"
+        >
+          <div class="stat-icon blue">➕</div>
+          <div class="stat-info">
+            <h3>Adicionar Itens</h3>
+            <p style="color: var(--text-light); font-size: 0.9rem">
+              Cadastrar produto
+            </p>
+          </div>
+        </div>
+        <div
+          class="stat-card"
+          onclick="location.href = '/estoque'"
+          style="cursor: pointer"
+        >
+          <div class="stat-icon green">📦</div>
+          <div class="stat-info">
+            <h3>Estoque</h3>
+            <p style="color: var(--text-light); font-size: 0.9rem">
+              Ver todos os itens
+            </p>
+          </div>
+        </div>
+        <div
+          class="stat-card"
+          onclick="location.href = '/saidas'"
+          style="cursor: pointer"
+        >
+          <div class="stat-icon red">📤</div>
+          <div class="stat-info">
+            <h3>Registrar Saídas</h3>
+            <p style="color: var(--text-light); font-size: 0.9rem">
+              Retirada de insumos
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="card-header">
+          <h2>Últimos Itens Cadastrados</h2>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Quantidade</th>
+                <th>Foto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in ultimos %}
+              <tr>
+                <td><strong>{{ item.nome }}</strong></td>
+                <td>
+                  {% if item.quantidade <= 0 %}
+                  <span style="font-weight: bold; color: var(--danger-color)"
+                    >{{ item.quantidade }}</span
+                  >
+                  {% else %}
+                  <span style="font-weight: bold">{{ item.quantidade }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if item.imagem %}
+                  <button
+                    class="btn btn-secondary"
+                    onclick="visualizarFoto('{{ item.nome }}', '/static/img/{{ item.imagem }}')"
+                  >
+                    🖼️ Ver foto
+                  </button>
+                  {% else %}
+                  <span>Sem foto</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td
+                >
+                  Nenhum item cadastrado ainda.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Função para confirmar saída do sistema de forma segura
+      function confirmarLogout(event) {
+        event.preventDefault(); // Impede o link de redirecionar direto para "/"
+
+        Swal.fire({
+          title: "Deseja mesmo sair?",
+          text: "Sua sessão no gerenciador de almoxarifado será finalizada.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Sim, sair",
+          cancelButtonText: "Cancelar",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = "/"; // Redireciona para a rota de login/logout
+          }
+        });
+      }
+
+      // Função otimizada para exibir a foto do produto com título
+      function visualizarFoto(nomeItem, urlImagem) {
+        Swal.fire({
+          title: nomeItem,
+          imageUrl: urlImagem,
+          imageHeight: 300,
+          imageAlt: "Foto de " + nomeItem,
+          confirmButtonText: "Fechar",
+          confirmButtonColor: "#3085d6",
+        });
+      }
+    </script>
+  </body>
+</html>

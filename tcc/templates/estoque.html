@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Estoque - SENAI</title>
+    <link
+      rel="shortcut icon"
+      type="image/png"
+      href="{{ url_for('static', filename='fiep.jpg') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="brand">SENAI</div>
+      <div class="nav-links">
+        <a href="/home">Home</a>
+        <a href="/adicionaritens">Adicionar Itens</a>
+        {% if session.get('tipo') == 'adm' %}
+        <a href="/saidas">Registrar Saídas</a>
+        {% endif %}
+        <a href="/" class="btn-logout">Fechar</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="header-section">
+        <h1>Estoque</h1>
+        <p>Visualize todos os itens cadastrados no almoxarifado.</p>
+      </div>
+
+      {% if session.get('tipo') == 'adm' %}
+      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <a href="/exportar-csv" style="text-decoration:none;">
+          <button class="btn btn-primary">⬇️ Exportar CSV</button>
+        </a>
+        <label class="btn btn-primary" style="cursor:pointer; margin:0;">
+          ⬆️ Importar CSV
+          <input type="file" id="inputImportar" accept=".csv" style="display:none" onchange="importarCSV(this)">
+        </label>
+      </div>
+      {% endif %}
+
+      <div class="content-card">
+        <div class="card-header">
+          <h2>Itens em Estoque</h2>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Quantidade</th>
+                <th>Est. Mínimo</th>
+                <th style="text-align: center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in itens %}
+              <tr>
+                <td>{{ item.id }}</td>
+                <td><strong>{{ item.nome }}</strong></td>
+                <td>{{ item.descricao }}</td>
+                <td>
+                  <span class="badge badge-success">{{ item.categoria }}</span>
+                </td>
+                <td>R$ {{ "%.2f"|format(item.preco) }}</td>
+                <td>
+                  {% if item.quantidade <= item.estoque_min %}
+                  <span class="badge badge-danger">{{ item.quantidade }}</span>
+                  {% else %}
+                  <strong>{{ item.quantidade }}</strong>
+                  {% endif %}
+                </td>
+                <td>{{ item.estoque_min }}</td>
+                <td style="text-align: center">
+                  <button
+                    class="btn btn-primary"
+                    style="padding: 0.4rem 0.8rem; font-size: 0.85rem"
+                    onclick="verInfo('{{ item.nome }}', '{{ item.descricao }}', '{{ item.categoria }}', '{{ item.imagem or '' }}')"
+                  >
+                    Detalhes
+                  </button>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td
+                  colspan="8"
+                  style="text-align: center; color: var(--text-light)"
+                >
+                  Nenhum item cadastrado ainda.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function importarCSV(input) {
+        const arquivo = input.files[0];
+        if (!arquivo) return;
+        const formData = new FormData();
+        formData.append("arquivo", arquivo);
+        Swal.fire({ title: "Importando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        fetch("/importar-csv", { method: "POST", body: formData })
+          .then(r => r.json())
+          .then(data => {
+            if (data.ok) {
+              Swal.fire({
+                icon: "success",
+                title: "Importado com sucesso!",
+                html: `Estoque: <b>${data.importados.estoque}</b> itens<br>Saídas: <b>${data.importados.saidas}</b> registros<br>Usuários: <b>${data.importados.usuarios}</b>`
+              }).then(() => location.reload());
+            } else {
+              Swal.fire({ icon: "error", title: "Erro", text: data.erro });
+            }
+          });
+        input.value = "";
+      }
+
+      function verInfo(nome, descricao, categoria, imagem) {
+        const fotoHtml = imagem
+          ? `<img src="/static/img/${imagem}" style="max-width:100%; max-height:250px; border-radius:8px; margin-bottom:12px;">`
+          : `<p style="color:#aaa;">Sem foto cadastrada.</p>`;
+
+        Swal.fire({
+          title: nome,
+          html: `
+                    ${fotoHtml}
+                    <div style="text-align: left; margin-top: 10px;">
+                        <p><strong>Categoria:</strong> ${categoria}</p>
+                        <p><strong>Descrição:</strong> ${descricao}</p>
+                    </div>
+                `,
+          confirmButtonText: "Fechar",
+          confirmButtonColor: "#3085d6",
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta - SENAI</title>
+    <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='fiep.jpg') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-left">
+            <img src="{{ url_for('static', filename='Captura de tela 2026-05-11 172346.png') }}" alt="Almoxarifado">
+        </div>
+
+        <div class="login-right">
+            <img src="{{ url_for('static', filename='Gemini_Generated_Image_3n74o93n74o93n74.png') }}"
+                style="margin-bottom: 24px; max-width: 300px;" alt="Logo">
+
+            <div class="login-header">
+                <h2>Criar Conta</h2>
+                <p>Preencha os dados para criar um novo acesso ao sistema.</p>
+            </div>
+
+            <form id="formCriar" action="/api/criarconta" method="POST">
+                <div class="form-group">
+                    <label for="username">Usuário *</label>
+                    <input type="text" id="username" name="username" placeholder="Ex: joao.silva" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="senha">Senha *</label>
+                    <input type="password" id="senha" name="senha" placeholder="••••••••" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmar">Confirmar Senha *</label>
+                    <input type="password" id="confirmar" name="confirmar" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; height: 45px;">Criar Conta</button>
+            </form>
+
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <a href="/" style="color: var(--primary-color); font-weight: 500; text-decoration: none;">Voltar para o Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('formCriar').onsubmit = function (e) {
+            e.preventDefault();
+
+            const senha = document.getElementById('senha').value;
+            const confirmar = document.getElementById('confirmar').value;
+
+            if (senha !== confirmar) {
+                Swal.fire({
+                    title: 'Erro!',
+                    text: 'As senhas não coincidem.',
+                    icon: 'error'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Sucesso!',
+                text: 'Sua conta está sendo processada.',
+                icon: 'success',
+                confirmButtonColor: '#3085d6'
+            }).then(() => {
+                this.submit();
+            });
+        };
+    </script>
+</body>
+
+</html>
