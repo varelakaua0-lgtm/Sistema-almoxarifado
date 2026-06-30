@@ -220,8 +220,8 @@ def exportar_csv():
     writer = csv.writer(output)
 
     writer.writerow(["## ESTOQUE"])
-    writer.writerow(["id", "nome", "categoria", "descricao", "preco", "quantidade", "estoque_min"])
-    cursor.execute("SELECT id, nome, categoria, descricao, preco, quantidade, estoque_min FROM estoque")
+    writer.writerow(["id", "nome", "categoria", "descricao", "preco", "quantidade", "estoque_min", "imagem"])
+    cursor.execute("SELECT id, nome, categoria, descricao, preco, quantidade, estoque_min, imagem FROM estoque")
     for row in cursor.fetchall():
         writer.writerow(row.values())
 
@@ -288,8 +288,8 @@ def importar_csv():
 
         if secao == "estoque":
             cursor.execute(
-                "INSERT INTO estoque (nome, categoria, descricao, preco, quantidade, estoque_min) VALUES (%s, %s, %s, %s, %s, %s)",
-                (linha[1], linha[2], linha[3], linha[4], linha[5], linha[6])
+                "INSERT INTO estoque (nome, categoria, descricao, preco, quantidade, estoque_min, imagem) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                (linha[1], linha[2], linha[3], linha[4], linha[5], linha[6], linha[7] if len(linha) > 7 else None)
             )
             importados["estoque"] += 1
         elif secao == "saidas":
