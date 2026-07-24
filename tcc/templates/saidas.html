@@ -49,9 +49,9 @@
         .btn-apagar-banco {
             width: 100%;
             padding: 12px;
-            background: #1a1a1a;
-            color: #ff4d4d;
-            border: 2px solid #ff4d4d;
+            background: #150891;
+            color: #fefeff;
+            
             border-radius: 8px;
             cursor: pointer;
             font-weight: 700;
@@ -59,7 +59,6 @@
             margin-top: 16px;
             letter-spacing: 0.5px;
         }
-        .btn-apagar-banco:hover { background: #ff4d4d; color: white; }
 
         .log-table tr:nth-child(even) { background: #f8f9fa; }
         .badge-admin {
@@ -244,7 +243,7 @@
 
         function apagarBanco() {
             Swal.fire({
-                title: '⚠️ APAGAR TODO O BANCO?',
+                title: ' APAGAR TODO O BANCO?',
                 html: 'Isso vai apagar <b>todo o estoque, saídas e usuários</b>.<br>Essa ação <b>não pode ser desfeita</b>!',
                 icon: 'warning',
                 showCancelButton: true,
