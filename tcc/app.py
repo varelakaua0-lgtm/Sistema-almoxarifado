@@ -2,9 +2,11 @@ import os
 import csv
 import io
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
+from flask_bcrypt import Bcrypt
 import mysql.connector
 
 app = Flask(__name__)
+bcrypt = Bcrypt(app)
 app.secret_key = "Senai"
 app.config['IMG_FOLDER'] = 'static/img'
 os.makedirs('static/img', exist_ok=True)
@@ -77,6 +79,7 @@ def apilogin():
     username = request.form['username']
     senha = request.form['senha']
 
+    # Login fixo de Administrador
     if username.lower() == 'admin12' and senha == 'admin1212':
         session['usuario'] = username
         session['tipo'] = 'adm'
@@ -84,12 +87,14 @@ def apilogin():
 
     conexao = banco()
     cursor = conexao.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM usuario WHERE usuario = %s AND senha = %s", (username, senha))
+    # Busca o usuário pelo nome cadastrado
+    cursor.execute("SELECT * FROM usuario WHERE usuario = %s", (username,))
     usuario = cursor.fetchone()
     cursor.close()
     conexao.close()
 
-    if usuario:
+    # Valida a senha usando a extensão flask_bcrypt
+    if usuario and bcrypt.check_password_hash(usuario['senha'], senha):
         session['usuario'] = username
         session['tipo'] = 'user'
         return redirect(url_for('home'))
@@ -97,7 +102,7 @@ def apilogin():
     return """<script>alert("Usuário ou senha incorretos"); window.location.href = "/";</script>"""
 
 
-#CRIAR CONTA
+# ========== CRIAR CONTA ==========
 @app.route('/api/criarconta', methods=['POST'])
 def api_criarconta():
     username = request.form['username']
@@ -117,8 +122,11 @@ def api_criarconta():
         conexao.close()
         return """<script>alert("Usuário já cadastrado!"); window.location.href = "/criarconta";</script>"""
 
+    # Gera a hash da senha de forma segura com Flask-Bcrypt
+    senha_hash = bcrypt.generate_password_hash(senha).decode('utf-8')
+
     cursor2 = conexao.cursor()
-    cursor2.execute("INSERT INTO usuario (usuario, senha) VALUES (%s, %s)", (username, senha))
+    cursor2.execute("INSERT INTO usuario (usuario, senha) VALUES (%s, %s)", (username, senha_hash))
     conexao.commit()
     cursor2.close()
     cursor.close()
@@ -127,7 +135,7 @@ def api_criarconta():
     return """<script>alert("Conta criada com sucesso!"); window.location.href = "/";</script>"""
 
 
-# ADICIONAR ITEM 
+# ========== ADICIONAR ITEM ==========
 @app.route('/api/adicionaritem', methods=['POST'])
 def adicionaritem():
     nome = request.form['nome']
@@ -156,7 +164,7 @@ def adicionaritem():
     return """<script>alert("Item adicionado com sucesso!"); window.location.href = "/estoque";</script>"""
 
 
-# DELETAR ITEM DO ESTOQUE 
+# ========== DELETAR ITEM DO ESTOQUE ==========
 @app.route("/api/deletaritem/<int:id>", methods=["DELETE"])
 def api_deletaritem(id):
     if session.get('tipo') != 'adm':
@@ -176,12 +184,10 @@ def api_deletaritem(id):
         return jsonify({"ok": False, "erro": "Item não encontrado"})
 
     cursor2 = conexao.cursor()
-    # Salva no log_deletes
     cursor2.execute(
         "INSERT INTO log_deletes (nome_admin, item, categoria, descricao, preco, qtde, estoque_min, data_delete) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
         (nome_admin, item['nome'], item['categoria'], item['descricao'], item['preco'], item['quantidade'], item['estoque_min'], data_delete)
     )
-    # Também salva na tabela saidas (mantem compatibilidade)
     cursor2.execute(
         "INSERT INTO saidas (item, qtde, descricao, preco, categoria, estoque_min) VALUES (%s, %s, %s, %s, %s, %s)",
         (item['nome'], item['quantidade'], item['descricao'], item['preco'], item['categoria'], item['estoque_min'])
@@ -204,7 +210,6 @@ def api_item(id):
     cursor.close()
     conexao.close()
     return jsonify(item if item else {})
-
 
 
 # ========== EXPORTAR CSV ==========
@@ -236,8 +241,8 @@ def exportar_csv():
     writer.writerow([])
 
     writer.writerow(["## USUARIOS"])
-    writer.writerow(["id", "nome", "email"])
-    cursor.execute("SELECT id, nome, email FROM usuario")
+    writer.writerow(["id", "usuario", "senha"])
+    cursor.execute("SELECT id, usuario, senha FROM usuario")
     for row in cursor.fetchall():
         writer.writerow(row.values())
 
@@ -300,7 +305,7 @@ def importar_csv():
             importados["saidas"] += 1
         elif secao == "usuarios":
             cursor.execute(
-                "INSERT INTO usuario (nome, email) VALUES (%s, %s)",
+                "INSERT INTO usuario (usuario, senha) VALUES (%s, %s)",
                 (linha[1], linha[2])
             )
             importados["usuarios"] += 1
