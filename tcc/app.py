@@ -97,7 +97,7 @@ def apilogin():
     return """<script>alert("Usuário ou senha incorretos"); window.location.href = "/";</script>"""
 
 
-# ========== CRIAR CONTA ==========
+#CRIAR CONTA
 @app.route('/api/criarconta', methods=['POST'])
 def api_criarconta():
     username = request.form['username']
@@ -127,7 +127,7 @@ def api_criarconta():
     return """<script>alert("Conta criada com sucesso!"); window.location.href = "/";</script>"""
 
 
-# ========== ADICIONAR ITEM ==========
+# ADICIONAR ITEM 
 @app.route('/api/adicionaritem', methods=['POST'])
 def adicionaritem():
     nome = request.form['nome']
@@ -156,7 +156,7 @@ def adicionaritem():
     return """<script>alert("Item adicionado com sucesso!"); window.location.href = "/estoque";</script>"""
 
 
-# ========== DELETAR ITEM DO ESTOQUE ==========
+# DELETAR ITEM DO ESTOQUE 
 @app.route("/api/deletaritem/<int:id>", methods=["DELETE"])
 def api_deletaritem(id):
     if session.get('tipo') != 'adm':
@@ -181,7 +181,7 @@ def api_deletaritem(id):
         "INSERT INTO log_deletes (nome_admin, item, categoria, descricao, preco, qtde, estoque_min, data_delete) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
         (nome_admin, item['nome'], item['categoria'], item['descricao'], item['preco'], item['quantidade'], item['estoque_min'], data_delete)
     )
-    # Também salva na tabela saidas (mantém compatibilidade)
+    # Também salva na tabela saidas (mantem compatibilidade)
     cursor2.execute(
         "INSERT INTO saidas (item, qtde, descricao, preco, categoria, estoque_min) VALUES (%s, %s, %s, %s, %s, %s)",
         (item['nome'], item['quantidade'], item['descricao'], item['preco'], item['categoria'], item['estoque_min'])
