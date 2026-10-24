@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Usuários - SENAI</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='fiep.jpg') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .page-wrapper {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+        .form-side {
+            flex: 1;
+            min-width: 300px;
+        }
+        .table-side {
+            flex: 2;
+            min-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        table { width: 100%; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #f8f9fa; }
+
+        .badge-adm  { background: #150891; color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .badge-user { background: #6c757d; color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+
+        .btn-full { width: 100%; }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="brand">SENAI</div>
+        <div class="nav-links">
+            <a href="/home">Home</a>
+            <a href="/adicionaritens">Adicionar Itens</a>
+            <a href="/estoque">Estoque</a>
+            <a href="/saidas">Registrar Saídas</a>
+            <a href="/admin/usuarios">Gerenciar Usuários</a>
+            <a href="#" class="btn-logout">Fechar</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <h1>Gerenciar Usuários</h1>
+            <p>Crie novos usuários ou administradores e gerencie os acessos ao sistema.</p>
+        </div>
+
+        <div class="page-wrapper">
+
+            <!-- ── FORMULÁRIO CRIAR USUÁRIO/ADMIN ── -->
+            <div class="form-side">
+                <div class="content-card">
+                    <div class="card-header"><h2>Novo Acesso</h2></div>
+
+                    <div class="form-group">
+                        <label for="novo_username">Usuário *</label>
+                        <input type="text" id="novo_username" placeholder="Ex: joao.silva">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="novo_nome">Nome</label>
+                        <input type="text" id="novo_nome" placeholder="Ex: João Silva">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="novo_email">E-mail</label>
+                        <input type="email" id="novo_email" placeholder="Ex: joao@email.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="novo_senha">Senha *</label>
+                        <input type="password" id="novo_senha" placeholder="••••••••">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="novo_tipo">Tipo de Acesso *</label>
+                        <select id="novo_tipo">
+                            <option value="user">Usuário</option>
+                            <option value="adm">Administrador</option>
+                        </select>
+                    </div>
+
+                    <button type="button" onclick="criarUsuario()" class="btn btn-primary btn-full">
+                        Criar Acesso
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── TABELA DE USUÁRIOS ── -->
+            <div class="table-side">
+                <h2>Usuários Cadastrados</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuário</th>
+                            <th>Nome</th>
+                            <th>Tipo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                        <tr>
+                            <td>{{ u.id }}</td>
+                            <td>{{ u.usuario }}</td>
+                            <td>{{ u.nome or '-' }}</td>
+                            <td>
+                                {% if u.tipo == 'adm' %}
+                                <span class="badge-adm">Administrador</span>
+                                {% else %}
+                                <span class="badge-user">Usuário</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn-remover" onclick="excluirUsuario({{ u.id }}, '{{ u.usuario }}')">
+                                    Excluir
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5">Nenhum usuário cadastrado ainda.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function criarUsuario() {
+            const username = document.getElementById('novo_username').value.trim();
+            const nome     = document.getElementById('novo_nome').value.trim();
+            const email    = document.getElementById('novo_email').value.trim();
+            const senha    = document.getElementById('novo_senha').value;
+            const tipo     = document.getElementById('novo_tipo').value;
+
+            if (!username || !senha) {
+                Swal.fire({ icon: 'warning', title: 'Preencha usuário e senha!' });
+                return;
+            }
+
+            const dados = { username, senha, nome, email, tipo };
+
+            fetch('/api/admin/criarusuario', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            })
+            .then(r => r.json())
+            .then(resp => {
+                if (resp.ok) {
+                    Swal.fire('Sucesso!', resp.mensagem, 'success')
+                        .then(() => location.reload());
+                } else {
+                    Swal.fire('Erro!', resp.erro, 'error');
+                }
+            })
+            .catch(() => Swal.fire('Erro!', 'Não foi possível criar o acesso.', 'error'));
+        }
+
+        function excluirUsuario(id, nome) {
+            Swal.fire({
+                title: 'Confirmar exclusão?',
+                html: `O usuário <b>"${nome}"</b> será removido permanentemente.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: 'Cancelar',
+                confirmButtonText: 'Sim, excluir!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/api/admin/deletarusuario/${id}`, { method: 'DELETE' })
+                        .then(r => r.json())
+                        .then(resp => {
+                            if (resp.ok) {
+                                Swal.fire('Excluído!', resp.mensagem, 'success')
+                                    .then(() => location.reload());
+                            } else {
+                                Swal.fire('Erro!', resp.erro, 'error');
+                            }
+                        });
+                }
+            });
+        }
+    </script>
+<script>
+        document.querySelectorAll('.btn-logout').forEach(function(botao) {
+            botao.addEventListener('click', function(e) {
+                e.preventDefault();
+                fetch('/api/logout', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(() => window.location.href = '/');
+            });
+        });
+    </script>
+</body>
+</html>

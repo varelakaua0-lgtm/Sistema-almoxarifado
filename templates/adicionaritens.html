@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Itens - SENAI</title>
+    <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='fiep.jpg') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {% include '_menu.html' %}
+
+    <div class="container">
+        <div class="header-section">
+            <h1>Adicionar Itens</h1>
+            <p>Cadastre um novo produto no estoque do almoxarifado.</p>
+        </div>
+
+        <div class="content-card" style="max-width: 800px; margin: 0 auto; margin-bottom: 2rem;">
+            <div class="card-header">
+                <h2>➕ Dados do Item</h2>
+            </div>
+
+            <form id="formAdd" method="POST" action="/api/adicionaritem" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="nome">Nome *</label>
+                    <input type="text" id="nome" name="nome" placeholder="Ex: Parafuso phillips" required>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="categoria">Categoria *</label>
+                        <input type="text" id="categoria" name="categoria" placeholder="Ex: Elétrica" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="preco">Preço (R$) *</label>
+                        <input type="number" step="0.01" id="preco" name="preco" placeholder="0.00" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="descricao">Descrição *</label>
+                    <textarea id="descricao" name="descricao" rows="3" placeholder="Detalhes técnicos do item..." required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; font-family: inherit; resize: vertical;"></textarea>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="quantidade">Quantidade Inicial *</label>
+                        <input type="number" id="quantidade" name="quantidade" placeholder="0" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="estoqueminimo">Estoque Mínimo *</label>
+                        <input type="number" id="estoqueminimo" name="estoqueminimo" placeholder="0" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="imagem">Foto do Produto</label>
+                    <input type="file" id="imagem" name="imagem" accept="image/*" style="padding: 0.5rem 1rem;">
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 2;">Adicionar Item</button>
+                    <a href="/home" class="btn btn-secondary" style="flex: 1; text-align: center;">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('formAdd').onsubmit = function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Confirmar Cadastro?',
+                text: 'O item será adicionado ao banco de dados.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sim, adicionar!',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const formData = new FormData(this);
+
+                    fetch('/api/adicionaritem', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.ok) {
+                            Swal.fire('Sucesso!', data.mensagem, 'success')
+                                .then(() => window.location.href = '/estoque');
+                        } else {
+                            Swal.fire('Erro!', data.erro, 'error');
+                        }
+                    });
+                }
+            });
+        };
+    </script>
+<script>
+        document.querySelectorAll('.btn-logout').forEach(function(botao) {
+            botao.addEventListener('click', function(e) {
+                e.preventDefault();
+                fetch('/api/logout', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(() => window.location.href = '/');
+            });
+        });
+    </script>
+    <!-- ===== CHAT COM IA ===== -->
+    <div id="chat-widget" class="chat-widget">
+        <button type="button" id="chat-launcher" class="chat-launcher" aria-label="Abrir assistente">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <div id="chat-panel" class="chat-panel" hidden>
+            <div class="chat-header">
+                <span class="chat-title">Assistente</span>
+                <div class="chat-actions">
+                    <button type="button" id="chat-new" class="chat-icon-btn" aria-label="Nova conversa">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    </button>
+                    <button type="button" id="chat-close" class="chat-icon-btn" aria-label="Minimizar">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="chat-messages" class="chat-messages"></div>
+            <div class="chat-composer-wrap">
+                <div class="chat-composer" id="chat-composer">
+                    <input type="text" id="chat-input" placeholder="Pergunte sobre estoque, itens ou cadastros" aria-label="Mensagem para o assistente" autocomplete="off">
+                    <div class="chat-composer-row">
+                        <button type="button" id="chat-send" class="chat-send" aria-label="Enviar" disabled>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            const panel = document.getElementById('chat-panel');
+            const launcher = document.getElementById('chat-launcher');
+            const box = document.getElementById('chat-messages');
+            const input = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('chat-send');
+            let aguardando = false;
+
+            function escapar(t) {
+                return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+
+            // Deixa o texto da IA legível (negrito, listas e quebras de linha)
+            function formatar(t) {
+                return escapar(t)
+                    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/^\s*[*-] /gm, '• ')
+                    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                    .replace(/\n/g, '<br>');
+            }
+
+            function rolar() { box.scrollTop = box.scrollHeight; }
+
+            function msgUsuario(texto) {
+                const div = document.createElement('div');
+                div.className = 'chat-user';
+                div.textContent = texto;
+                box.appendChild(div);
+                rolar();
+            }
+
+            function msgBot(html, tempo, carregando) {
+                const sec = document.createElement('div');
+                sec.className = 'chat-section' + (carregando ? ' resolving' : '');
+                sec.innerHTML =
+                    '<div class="chat-meta"><span class="chat-label">Assistente</span>' +
+                    '<span class="chat-sub">Almoxarifado</span><span class="chat-tempo"></span></div><p></p>';
+                sec.querySelector('p').innerHTML = html;
+                if (tempo) sec.querySelector('.chat-tempo').textContent = tempo;
+                box.appendChild(sec);
+                rolar();
+                return sec;
+            }
+
+            function atualizarBotao() {
+                sendBtn.disabled = aguardando || !input.value.trim();
+            }
+
+            function novaConversa() {
+                box.innerHTML = '';
+                msgBot('Olá! Como posso ajudar você hoje?');
+                input.value = '';
+                atualizarBotao();
+                input.focus();
+            }
+
+            function alternarChat() {
+                const abrir = panel.hidden;
+                panel.hidden = !abrir;
+                launcher.hidden = abrir;
+                if (abrir) input.focus();
+            }
+
+            async function enviar() {
+                const texto = input.value.trim();
+                if (!texto || aguardando) return;
+
+                msgUsuario(texto);
+                input.value = '';
+                aguardando = true;
+                atualizarBotao();
+
+                const inicio = Date.now();
+                const sec = msgBot('Pensando...', '', true);
+                let resposta;
+
+                try {
+                    const r = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: texto })
+                    });
+                    const data = await r.json();
+                    resposta = r.ok ? formatar(data.response || '') : 'Desculpe, ocorreu um erro ao processar sua dúvida.';
+                } catch (e) {
+                    resposta = 'Erro na comunicação com o servidor.';
+                }
+
+                sec.querySelector('p').innerHTML = resposta;
+                sec.querySelector('.chat-tempo').textContent = 'em ' + Math.max(1, Math.round((Date.now() - inicio) / 1000)) + 's';
+                sec.classList.remove('resolving');
+                aguardando = false;
+                atualizarBotao();
+                rolar();
+                input.focus();
+            }
+
+            launcher.addEventListener('click', alternarChat);
+            document.getElementById('chat-close').addEventListener('click', alternarChat);
+            document.getElementById('chat-new').addEventListener('click', novaConversa);
+            document.getElementById('chat-composer').addEventListener('click', () => input.focus());
+            sendBtn.addEventListener('click', enviar);
+            input.addEventListener('input', atualizarBotao);
+            input.addEventListener('keydown', e => { if (e.key === 'Enter') enviar(); });
+
+            msgBot('Olá! Como posso ajudar você hoje?');
+        })();
+    </script>
+</body>
+</html>

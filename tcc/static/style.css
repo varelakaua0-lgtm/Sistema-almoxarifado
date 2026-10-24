@@ -1,0 +1,354 @@
+/* ============================================================
+   VARIÁVEIS GLOBAIS (Custom Properties do CSS)
+   Definidas no ':root' — ficam disponíveis em TODO o arquivo.
+   Em vez de repetir '#114a8b' em 50 lugares, usamos 'var(--primary-color)'.
+   Se quiser mudar a cor principal do sistema, muda só aqui.
+   ============================================================ */
+:root {
+    --primary-color: #114a8b;    /* Azul escuro — cor principal do sistema (navbar, botões) */
+    --primary-hover: #0d3b6f;    /* Azul mais escuro — aparece quando passa o mouse no botão */
+    --secondary-color: #f1f3f6;  /* Cinza claro — cor de fundo das páginas */
+    --danger-color: #e03a3a;     /* Vermelho — usado em alertas, botão deletar, estoque baixo */
+    --text-color: #333;          /* Cinza escuro — cor do texto principal */
+    --text-light: #666;          /* Cinza médio — textos secundários, subtítulos */
+    --white: #ffffff;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Sombra padrão dos cards */
+    --border-radius: 12px;       /* Arredondamento padrão dos cantos */
+    --transition: all 0.3s ease; /* Animação suave padrão para hover e mudanças visuais */
+}
+
+/* ============================================================
+   RESET GLOBAL
+   Remove margens e paddings padrão que os navegadores aplicam.
+   Garante que o layout seja igual em todos os navegadores.
+   ============================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* 'border-box' faz o padding e border serem incluídos no tamanho total do elemento.
+       Sem isso, um elemento com width:200px e padding:20px ficaria com 240px de largura. */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    /* Define a fonte para TODOS os elementos. 'Inter' é a fonte importada do Google Fonts.
+       As outras são fontes de sistema, usadas como fallback se 'Inter' não carregar. */
+}
+
+body {
+    background-color: var(--secondary-color); /* Fundo cinza claro nas páginas internas */
+    color: var(--text-color);                 /* Cor padrão do texto */
+    line-height: 1.6;                         /* Espaçamento entre linhas — melhora a leitura */
+}
+
+/* ============================================================
+   NAVBAR — Barra de navegação no topo das páginas internas
+   ============================================================ */
+.navbar {
+    background: var(--primary-color);  /* Fundo azul */
+    color: var(--white);
+    padding: 1rem 2rem;                /* Espaçamento interno: 1rem vertical, 2rem horizontal */
+    display: flex;                     /* Coloca logo e links lado a lado */
+    justify-content: space-between;   /* Logo à esquerda, links à direita */
+    align-items: center;              /* Alinha verticalmente ao centro */
+    position: sticky;                 /* A navbar "gruda" no topo ao rolar a página */
+    top: 0;                           /* Fica colada no topo */
+    z-index: 1000;                    /* Aparece por cima de todos os outros elementos */
+    box-shadow: var(--shadow);        /* Sombra embaixo da navbar */
+}
+
+.navbar .brand {
+    font-size: 1.5rem;
+    font-weight: 800; /* Extra bold — nome "SENAI" em destaque */
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;      /* Espaçamento entre os links */
+    align-items: center;
+}
+
+.nav-links a {
+    color: var(--white);
+    text-decoration: none;    /* Remove o sublinhado padrão dos links */
+    font-weight: 500;
+    font-size: 0.95rem;
+    opacity: 0.9;             /* Levemente transparente no estado normal */
+    transition: var(--transition); /* Animação suave no hover */
+}
+
+.nav-links a:hover {
+    opacity: 1;                  /* Fica totalmente opaco ao passar o mouse */
+    transform: translateY(-1px); /* Sobe 1px — efeito visual sutil */
+}
+
+.nav-links .btn-logout {
+    background: rgba(255, 255, 255, 0.1); /* Fundo branco bem transparente */
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    /* Estilo especial para o botão "Fechar" — se destaca dos outros links */
+}
+
+.nav-links .btn-logout:hover {
+    background: rgba(255, 255, 255, 0.2); /* Fica um pouco mais visível no hover */
+}
+
+/* ============================================================
+   CONTAINER — Envolve o conteúdo principal das páginas
+   ============================================================ */
+.container {
+    max-width: 100%;
+    margin: 2rem auto;   /* 2rem de espaço no topo e rodapé, centralizado */
+    padding: 0 2rem;     /* 2rem de margem nas laterais */
+}
+
+.header-section {
+    margin-bottom: 2rem; /* Espaço abaixo do título antes do conteúdo */
+}
+
+.header-section h1 {
+    font-size: 2rem;
+    color: var(--primary-color); /* Título em azul */
+    margin-bottom: 0.5rem;
+}
+
+.header-section p {
+    color: var(--text-light); /* Subtítulo em cinza claro */
+}
+
+/* ============================================================
+   CARDS DE ESTATÍSTICA (Atalhos na Home)
+   Os três blocos clicáveis: Adicionar, Estoque, Saídas
+   ============================================================ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    /* 'auto-fit' + 'minmax' → cria quantas colunas couberem.
+       Cada coluna tem no mínimo 250px. Em telas pequenas, empilha verticalmente. */
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: var(--border-radius); /* Cantos arredondados */
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 1rem;           /* Espaço entre o ícone e o texto */
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px); /* Sobe 5px ao passar o mouse — efeito de "levantar" */
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;        /* Deixa o ícone em formato circular */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* Cores de fundo dos ícones — cada card tem uma cor diferente */
+.stat-icon.blue  { background: #e7eff7; }  /* Azul claro */
+.stat-icon.green { background: #fff0e6; }  /* Laranja claro (estoque) */
+.stat-icon.red   { background: #fcebeb; }  /* Vermelho claro (saídas) */
+
+.stat-info h3 {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    text-transform: uppercase;  /* Texto em maiúsculas */
+    letter-spacing: 0.5px;      /* Pequeno espaço entre as letras */
+}
+
+/* ============================================================
+   CARD DE CONTEÚDO — Caixa branca que envolve tabelas e formulários
+   ============================================================ */
+.content-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    overflow: hidden; /* Evita que conteúdo vaze para fora do card */
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem; /* Espaço entre o título do card e seu conteúdo */
+}
+
+/* ============================================================
+   TABELA — Usada nas páginas de Estoque, Home e Saídas
+   ============================================================ */
+.table-responsive {
+    overflow-x: auto;
+    /* Adiciona scroll horizontal se a tabela for mais larga que a tela.
+       Importante para funcionar bem em celulares. */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse; /* Remove espaço duplo entre bordas das células */
+}
+
+th {
+    text-align: left;
+    background: #f8f9fa;       /* Cabeçalho com fundo cinza bem claro */
+    padding: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-light);
+    border-bottom: 2px solid #eee; /* Linha mais grossa embaixo do cabeçalho */
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee; /* Linha divisória entre linhas da tabela */
+    font-size: 0.95rem;
+    vertical-align: middle;   /* Alinha o conteúdo da célula ao centro vertical */
+}
+
+tr:last-child td {
+    border-bottom: none; /* Remove a linha da última linha da tabela — fica mais limpo */
+}
+
+/* ============================================================
+   BADGES — Etiquetas coloridas (categoria, quantidade baixa)
+   ============================================================ */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;    /* Bordas muito arredondadas — formato de pílula */
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-success { background: #eaf6ed; color: #2fa84f; } /* Verde — categoria normal */
+.badge-danger  { background: #fcebeb; color: var(--danger-color); } /* Vermelho — estoque baixo */
+
+/* ============================================================
+   FORMULÁRIOS — Campos de texto, labels, inputs
+   ============================================================ */
+.form-group {
+    margin-bottom: 1.5rem; /* Espaçamento entre cada campo do formulário */
+}
+
+label {
+    display: block;        /* Coloca o label em linha própria, acima do input */
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+input, select, textarea {
+    width: 100%;           /* Ocupa toda a largura disponível */
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: var(--transition); /* Animação suave ao focar */
+}
+
+input:focus, select:focus {
+    border-color: var(--primary-color); /* Borda azul quando o campo está ativo */
+    outline: none;                       /* Remove o contorno padrão do navegador */
+    box-shadow: 0 0 0 3px rgba(17, 74, 139, 0.1); /* Brilho azul sutil ao redor do campo */
+}
+
+/* ============================================================
+   BOTÕES
+   ============================================================ */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;        /* Cursor de mão ao passar o mouse */
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;            /* Espaço entre ícone e texto do botão */
+    text-decoration: none;  /* Remove sublinhado quando o botão é um <a> */
+    font-size: 0.95rem;
+}
+
+.btn-primary       { background: var(--primary-color); color: var(--white); }
+.btn-primary:hover { background: var(--primary-hover); } /* Azul mais escuro no hover */
+
+.btn-secondary       { background: #e9ecef; color: var(--text-color); }
+.btn-secondary:hover { background: #dee2e6; }
+
+/* Botão vermelho específico para ação de remover na página de saídas */
+.btn-remover {
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.3rem 0.7rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+.btn-remover:hover { opacity: 0.8; } /* Fica levemente transparente no hover */
+
+/* ============================================================
+   GRID DE 2 COLUNAS — Usado em formulários para campos lado a lado
+   ============================================================ */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Duas colunas de tamanho igual */
+    gap: 1.5rem;
+}
+
+/* ============================================================
+   TELA DE LOGIN E CRIAR CONTA
+   Layout dividido em dois lados: imagem (esquerda) e formulário (direita)
+   ============================================================ */
+.login-container {
+    min-height: 100vh; /* Ocupa no mínimo 100% da altura da janela do navegador */
+    display: flex;     /* Coloca os dois lados lado a lado */
+}
+
+.login-left {
+    flex: 1;                    /* Ocupa todo o espaço restante (exceto o lado direito fixo) */
+    background: var(--primary-color); /* Fundo azul por baixo da imagem */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;           /* Esconde qualquer parte da imagem que vaze */
+}
+
+.login-left img {
+    position: absolute;  /* Cobre todo o lado esquerdo */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;   /* Imagem cobre o espaço sem distorcer */
+    opacity: 0.4;        /* Transparência — deixa o azul aparecer por baixo */
+}
+
+.login-right {
+    width: 450px;        /* Largura fixa do painel de login */
+    min-height: 100vh;
+    background: var(--white);
+    display: flex;
+    flex-direction: column;   /* Conteúdo empilhado verticalmente */
+    justify-content: center;  /* Centraliza verticalmente */
+    padding: 4rem;            /* Espaçamento interno generoso */
+    overflow-y: auto;         /* Scroll vertical se o conteúdo for maior que a tela */
+}
+
+.login-header h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.login-header p {
+    color: var(--text-light);
+    margin-bottom: 2rem; /* Espaço entre o subtítulo e o primeiro campo do formulário */
+}

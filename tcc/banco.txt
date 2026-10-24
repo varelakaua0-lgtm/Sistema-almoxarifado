@@ -1,0 +1,71 @@
+
+
+CREATE DATABASE IF NOT EXISTS almoxarifado;
+USE almoxarifado;
+
+CREATE TABLE IF NOT EXISTS administrador (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario VARCHAR(180) NOT NULL,
+    senha VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS usuario (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario VARCHAR(180) NOT NULL,
+    senha VARCHAR(255),
+    nome VARCHAR(255),
+    email VARCHAR(255),
+    tipo VARCHAR(20) NOT NULL DEFAULT 'user'
+);
+
+CREATE TABLE IF NOT EXISTS estoque (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(255),
+    categoria VARCHAR(255),
+    descricao VARCHAR(255),
+    preco DOUBLE,
+    quantidade INT,
+    estoque_min INT,
+    imagem VARCHAR(500)
+);
+
+CREATE TABLE IF NOT EXISTS saidas (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    item VARCHAR(255) NOT NULL,
+    qtde INT,
+    descricao VARCHAR(255),
+    preco DOUBLE,
+    categoria VARCHAR(255),
+    estoque_min INT,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS log_deletes (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome_admin VARCHAR(255) NOT NULL,
+    item VARCHAR(255) NOT NULL,
+    categoria VARCHAR(255),
+    descricao VARCHAR(255),
+    preco DOUBLE,
+    qtde INT,
+    estoque_min INT,
+    data_delete DATETIME,
+    registrado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+SELECT * FROM usuario;
+SELECT * FROM administrador;
+SELECT * FROM estoque;
+SELECT * FROM saidas;
+SELECT * FROM log_deletes;
+
+
+
+-- DROP DATABASE almoxarifado;
+
+USE almoxarifado;
+DESCRIBE usuario;
+
+ALTER TABLE usuario ADD COLUMN tipo VARCHAR(20) NOT NULL DEFAULT 'user';
